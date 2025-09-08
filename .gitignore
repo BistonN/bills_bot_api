@@ -1,0 +1,5 @@
+venv
+.vscode
+bills_db.session.sql
+.env
+__pycache__
