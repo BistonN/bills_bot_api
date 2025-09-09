@@ -21,7 +21,7 @@ def register_user():
     cursor = conn.cursor()
     
     try:
-        cursor.execute("SELECT id FROM users WHERE email = %s",(email))
+        cursor.execute("SELECT id FROM users WHERE email = %s",(email,))
         if cursor.fetchone():
             return jsonify({'message': 'Email já cadastrado.'}), 409
 
