@@ -3,3 +3,7 @@ venv
 bills_db.session.sql
 .env
 __pycache__
+csv_files
+service_account.json
+transcricao.json
+audios

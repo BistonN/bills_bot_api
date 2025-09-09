@@ -1,10 +1,77 @@
 from flask import Blueprint, request, jsonify
+import os
+import tempfile
+import asyncio
+from audio_process.nlp import ProcessadorFrase
 from db import get_db_connection, close_db_connection
 from models import Bill
 from utils.auth_helpers import token_required
 import mysql.connector
+from audio_process.speach_to_text import TranscritorGoogle
 
 bills_bp = Blueprint('bills', __name__)
+
+@bills_bp.route('/bills/audio', methods=['POST'])
+@token_required
+def create_bill_from_audio(current_user_id):
+    if 'audio' not in request.files:
+        return jsonify({'message': 'Arquivo de áudio não enviado!'}), 400
+    audio_file = request.files['audio']
+    if audio_file.filename == '':
+        return jsonify({'message': 'Nome do arquivo de áudio inválido!'}), 400
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        audio_path = os.path.join(tmpdir, audio_file.filename)
+        audio_file.save(audio_path)
+        transcricao_path = os.path.join(tmpdir, 'transcricao.json')
+
+        transcritor = TranscritorGoogle()
+        transcritor.transcrever(audio_path, transcricao_path)
+
+
+        pf = ProcessadorFrase()
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        nlp_result = loop.run_until_complete(pf.processar_de_json(transcricao_path))
+
+    categoria = nlp_result.get('categoria')
+    descricao = nlp_result.get('local')
+    valor = nlp_result.get('valor')
+    data = nlp_result.get('data')
+    if not all([categoria, descricao, valor, data]):
+        return jsonify({'message': 'Não foi possível extrair todos os dados do áudio.'}), 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+                INSERT INTO bills (
+                    user_id, 
+                    category_id, 
+                    description, 
+                    amount, 
+                    transaction_date) 
+                VALUES (
+                    %s,
+                    (
+                        SELECT id 
+                          FROM categories 
+                         WHERE name    = %s 
+                           AND user_id = %s
+                    ), 
+                    %s, 
+                    %s,
+                    %s
+                );""",
+            (current_user_id, categoria, current_user_id, descricao, valor, data)
+        )
+        conn.commit()
+        return jsonify({'message': 'Conta criada com sucesso a partir do áudio!', 'id': cursor.lastrowid}), 201
+    except mysql.connector.Error as err:
+        conn.rollback()
+        return jsonify({'message': f'Erro no banco de dados: {err}'}), 500
+    finally:
+        close_db_connection(conn)
 
 @bills_bp.route('/bills', methods=['POST'])
 @token_required

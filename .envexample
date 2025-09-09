@@ -1,0 +1,14 @@
+MYSQL_HOST=seu_host
+MYSQL_USER=usuario_do_mysql
+MYSQL_PASSWORD=senha_do_mysql
+MYSQL_DATABASE=bills_db
+
+SECRET_KEY=sua_secret_key
+
+FLASK_APP=app.py
+FLASK_ENV=development
+
+GRPC_DNS_RESOLVER=native
+GRPC_VERBOSITY=DEBUG
+GRPC_TRACE=api,cares_resolver,cares_address_sorting,client_channel
+GOOGLE_APPLICATION_CREDENTIALS=/caminho/absoluto/para/service_account.json
