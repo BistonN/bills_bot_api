@@ -1,3 +1,4 @@
+importlib-metadata
 aiofiles==24.1.0
 bcrypt==4.3.0
 beautifulsoup4==4.13.5
