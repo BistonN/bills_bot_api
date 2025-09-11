@@ -114,10 +114,24 @@ def create_bill(current_user_id):
 @bills_bp.route('/bills', methods=['GET'])
 @token_required
 def get_bills(current_user_id):
+    start_date = request.args.get('start_date')
+    final_date = request.args.get('final_date')
+    query = "SELECT * FROM bills WHERE user_id = %s"
+    params = [current_user_id]
+    if start_date and final_date:
+        query += " AND transaction_date BETWEEN %s AND %s"
+        params.extend([start_date, final_date])
+    elif start_date:
+        query += " AND transaction_date >= %s"
+        params.append(start_date)
+    elif final_date:
+        query += " AND transaction_date <= %s"
+        params.append(final_date)
+
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     try:
-        cursor.execute("SELECT * FROM bills WHERE user_id = %s", (current_user_id,))
+        cursor.execute(query, tuple(params))
         bills_data = cursor.fetchall()
         bills = [Bill(**data).to_dict() for data in bills_data]
         return jsonify(bills), 200
