@@ -3,10 +3,17 @@ import json
 from google.cloud import speech
 from dotenv import load_dotenv
 from pathlib import Path
+import tempfile
 
 load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent / ".env", override=True)
 
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+# Suporte para GOOGLE_APPLICATION_CREDENTIALS_JSON (para deploy seguro)
+if os.getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON"):
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as f:
+        f.write(os.getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON").encode())
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = f.name
+else:
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
 
 class TranscritorGoogle:
     def __init__(self):
