@@ -1,45 +1,63 @@
-aiofiles==24.1.0
-bcrypt==4.3.0
-beautifulsoup4==4.13.5
-blinker==1.9.0
-cachetools==5.5.2
-certifi==2025.8.3
-charset-normalizer==3.4.3
-click==8.2.1
+# Web framework
 Flask==3.1.2
 Flask-Bcrypt==1.0.1
+gunicorn==23.0.0
+
+# Segurança / Autenticação
+bcrypt==4.3.0
+PyJWT==2.10.1
+itsdangerous==2.2.0
+
+# Utilitários internos
+click==8.2.1
+Werkzeug==3.1.3
+Jinja2==3.1.6
+MarkupSafe==3.0.2
+blinker==1.9.0
+python-dotenv==1.1.1
+pathlib==1.0.1
+typing_extensions==4.15.0
+importlib-metadata==8.7.0
+zipp==3.23.0
+
+# Banco de dados
+mysql-connector-python==8.3.0
+
+# Manipulação de dados
+numpy==2.3.2
+pandas==2.3.2
+python-dateutil==2.9.0.post0
+pytz==2025.2
+tzdata==2025.2
+
+# HTTP
+requests==2.32.5
+urllib3==2.5.0
+charset-normalizer==3.4.3
+idna==3.10
+certifi==2025.8.3
+
+# Google Cloud Speech
 google-api-core==2.25.1
 google-auth==2.40.3
 google-cloud-speech==2.33.0
 googleapis-common-protos==1.70.0
 grpcio==1.74.0
 grpcio-status==1.74.0
-gunicorn==23.0.0
-idna==3.10
-importlib_metadata==8.7.0
-itsdangerous==2.2.0
-Jinja2==3.1.6
-MarkupSafe==3.0.2
-mysql-connector-python==8.3.0
-numpy==2.3.2
-packaging==25.0
-pandas==2.3.2
-pathlib==1.0.1
 proto-plus==1.26.1
 protobuf==6.32.0
-pt_core_news_lg @ https://github.com/explosion/spacy-models/releases/download/pt_core_news_lg-3.8.0/pt_core_news_lg-3.8.0-py3-none-any.whl#sha256=2561c9a72a938d37141e9694e1a36d25061a44ce7e4f3bad2d3fa3bb836191af
+rsa==4.9.1
 pyasn1==0.6.1
 pyasn1_modules==0.4.2
-PyJWT==2.10.1
-python-dateutil==2.9.0.post0
-python-dotenv==1.1.1
-pytz==2025.2
-requests==2.32.5
-rsa==4.9.1
-six==1.17.0
+cachetools==5.5.2
+
+# Scraping
+beautifulsoup4==4.13.5
 soupsieve==2.8
-typing_extensions==4.15.0
-tzdata==2025.2
-urllib3==2.5.0
-Werkzeug==3.1.3
-zipp==3.23.0
+aiofiles==24.1.0
+
+# NLP model
+pt_core_news_lg @ https://github.com/explosion/spacy-models/releases/download/pt_core_news_lg-3.8.0/pt_core_news_lg-3.8.0-py3-none-any.whl#sha256=2561c9a72a938d37141e9694e1a36d25061a44ce7e4f3bad2d3fa3bb836191af
+
+# Packaging
+packaging==25.0
