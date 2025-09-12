@@ -47,8 +47,10 @@ class ProcessadorFrase:
             conteudo = await f.read()
             data = json.loads(conteudo)
 
-        frase = data["resultados"][0]["alternativas"][0]["transcricao"]
-        return await self.processar(frase)
+        if len(data["resultados"]) > 0 :
+            frase = data["resultados"][0]["alternativas"][0]["transcricao"]
+            return await self.processar(frase)
+        return None
 
 
 

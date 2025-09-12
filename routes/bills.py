@@ -28,7 +28,6 @@ def create_bill_from_audio(current_user_id):
         transcritor = TranscritorGoogle()
         transcritor.transcrever(audio_path, transcricao_path)
 
-
         pf = ProcessadorFrase()
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
@@ -50,8 +49,8 @@ def create_bill_from_audio(current_user_id):
                     category_id, 
                     description, 
                     amount, 
-                    transaction_date) 
-                VALUES (
+                    transaction_date
+                ) VALUES (
                     %s,
                     (
                         SELECT id 
@@ -65,13 +64,30 @@ def create_bill_from_audio(current_user_id):
                 );""",
             (current_user_id, categoria, current_user_id, descricao, valor, data)
         )
+        new_bill_id = cursor.lastrowid
         conn.commit()
-        return jsonify({'message': 'Conta criada com sucesso a partir do áudio!', 'id': cursor.lastrowid}), 201
+        
+        cursor.execute("SELECT * FROM bills WHERE id = %s", (new_bill_id,))
+        new_bill_data = {
+            "id": new_bill_id, 
+            "user_id": current_user_id,\
+            "category_id": cursor.fetchone()[2],
+            "description": descricao,
+            "amount": valor,
+            "transaction_date": data
+        }
+        
+        if not new_bill_data:
+            return jsonify({'message': 'Erro ao recuperar a conta recém-criada.'}), 500
+
+        return jsonify(new_bill_data), 201
+    
     except mysql.connector.Error as err:
         conn.rollback()
         return jsonify({'message': f'Erro no banco de dados: {err}'}), 500
     finally:
-        close_db_connection(conn)
+        if conn and conn.is_connected():
+            close_db_connection(conn)
 
 @bills_bp.route('/bills', methods=['POST'])
 @token_required
