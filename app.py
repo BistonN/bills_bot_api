@@ -14,7 +14,7 @@ app.register_blueprint(auth_bp, url_prefix='/api/auth')
 app.register_blueprint(categories_bp, url_prefix='/api')
 app.register_blueprint(bills_bp, url_prefix='/api')
 
-@app.route('/')
+@app.route('/', methods=["GET", "POST", "PUT", "DELETE"])
 def hello_world():
     return jsonify({"message": "API de Contas Rodando!"})
 
