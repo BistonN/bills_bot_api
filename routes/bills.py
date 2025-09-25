@@ -33,11 +33,11 @@ def create_bill_from_audio(current_user_id):
         asyncio.set_event_loop(loop)
         nlp_result = loop.run_until_complete(pf.processar_de_json(transcricao_path))
 
-    categoria = nlp_result.get('categoria')
-    descricao = nlp_result.get('local')
-    valor = nlp_result.get('valor')
-    data = nlp_result.get('data')
-    if not all([categoria, descricao, valor, data]):
+    category = nlp_result.get('categoria')
+    description = nlp_result.get('local')
+    amount = nlp_result.get('valor')
+    transaction_date = nlp_result.get('data')
+    if not all([category, description, amount, transaction_date]):
         return jsonify({'message': 'Não foi possível extrair todos os dados do áudio.'}), 400
 
     conn = get_db_connection()
@@ -62,7 +62,7 @@ def create_bill_from_audio(current_user_id):
                     %s,
                     %s
                 );""",
-            (current_user_id, categoria, current_user_id, descricao, valor, data)
+            (current_user_id, category, current_user_id, description, amount, transaction_date)
         )
         new_bill_id = cursor.lastrowid
         conn.commit()
@@ -72,9 +72,9 @@ def create_bill_from_audio(current_user_id):
             "id": new_bill_id, 
             "user_id": current_user_id,\
             "category_id": cursor.fetchone()[2],
-            "description": descricao,
-            "amount": valor,
-            "transaction_date": data
+            "description": description,
+            "amount": amount,
+            "transaction_date": transaction_date
         }
         
         if not new_bill_data:
@@ -119,8 +119,22 @@ def create_bill(current_user_id):
                         %s);""",
             (current_user_id, category_name, current_user_id, description, amount, transaction_date)
         )
+        new_bill_id = cursor.lastrowid
         conn.commit()
-        return jsonify({'message': 'Conta criada com sucesso!', 'id': cursor.lastrowid}), 201
+        
+        cursor.execute("SELECT * FROM bills WHERE id = %s", (new_bill_id,))
+        new_bill_data = {
+            "id": new_bill_id, 
+            "category_id": cursor.fetchone()[2],
+            "description": description,
+            "amount": amount,
+            "transaction_date": transaction_date
+        }
+        
+        if not new_bill_data:
+            return jsonify({'message': 'Erro ao recuperar a conta recém-criada.'}), 500
+
+        return jsonify(new_bill_data), 201
     except mysql.connector.Error as err:
         conn.rollback()
         return jsonify({'message': f'Erro no banco de dados: {err}'}), 500
@@ -143,6 +157,7 @@ def get_bills(current_user_id):
     elif final_date:
         query += " AND transaction_date <= %s"
         params.append(final_date)
+    query += " ORDER BY transaction_date DESC"
 
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)

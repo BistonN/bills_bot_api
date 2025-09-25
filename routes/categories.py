@@ -11,7 +11,7 @@ categories_bp = Blueprint('categories', __name__)
 def create_category(current_user_id):
     data = request.get_json()
     name = data.get('name')
-    budget_amount = data.get('budget_amount')
+    budget_amount = None if not data.get('budget_amount') else data.get('budget_amount')
 
     if not name:
         return jsonify({'message': 'Nome da categoria é obrigatório!'}), 400
@@ -32,7 +32,12 @@ def create_category(current_user_id):
             (current_user_id, name, budget_amount)
         )
         conn.commit()
-        return jsonify({'message': 'Categoria criada com sucesso!', 'id': cursor.lastrowid}), 201
+        new_category = {
+            "id": cursor.lastrowid,
+            "name": name,
+            "budget_amount": budget_amount
+        }
+        return jsonify(new_category), 201
     except mysql.connector.Error as err:
         conn.rollback()
         return jsonify({'message': f'Erro no banco de dados: {err}'}), 500
@@ -61,7 +66,7 @@ def get_categories(current_user_id):
 def update_category(current_user_id, category_id):
     data = request.get_json()
     name = data.get('name')
-    budget_amount = data.get('budget_amount')
+    budget_amount = None if not data.get('budget_amount') else data.get('budget_amount')
 
     if not name and budget_amount is None:
         return jsonify({'message': 'Nenhum dado fornecido para atualização.'}), 400
@@ -96,7 +101,12 @@ def update_category(current_user_id, category_id):
         if cursor.rowcount == 0:
             return jsonify({'message': 'Categoria não encontrada ou nenhum dado alterado.'}), 404
         
-        return jsonify({'message': 'Categoria atualizada com sucesso!'}), 200
+        new_category = {
+            "id": category_id,
+            "name": name,
+            "budget_amount": budget_amount
+        }
+        return jsonify(new_category), 200
     except mysql.connector.Error as err:
         conn.rollback()
         return jsonify({'message': f'Erro no banco de dados: {err}'}), 500

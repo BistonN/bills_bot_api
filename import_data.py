@@ -13,8 +13,8 @@ DB_CONFIG = {
     "database": Config.MYSQL_DB
 }
 
-CSV_FOLDER = 'csv_files' # Pasta onde seus arquivos CSV estão
-FILENAME_DATE_REGEX = r'(\d{2})-(\d{4})\.csv$' # Ex: 01_2024.csv
+CSV_FOLDER = 'csv_files'
+FILENAME_DATE_REGEX = r'(\d{2})-(\d{4})\.csv$'
 
 MONTH_NAMES = {
     'jan': 1, 'fev': 2, 'mar': 3, 'abr': 4, 'mai': 5, 'jun': 6,
@@ -35,7 +35,7 @@ def ensure_user_exists(cursor, user_name="Admin", user_email="admin@example.com"
             "INSERT INTO users (name, email, password_hash) VALUES (%s, %s, %s)",
             (user_name, user_email, password_hash)
         )
-        return cursor.lastrowid # Retorna o ID do usuário recém-inserido
+        return cursor.lastrowid
 
 def ensure_category_exists(cursor, user_id, category_name, budget_amount=None):
     normalized_category_name = category_name.strip().upper()
@@ -112,7 +112,7 @@ def import_csv_to_db():
     except mysql.connector.Error as err:
         print(f"Erro no MySQL: {err}")
         if conn:
-            conn.rollback() # Desfaz as mudanças em caso de erro
+            conn.rollback()
     except Exception as e:
         print(f"Ocorreu um erro: {e}")
     finally:
@@ -122,7 +122,6 @@ def import_csv_to_db():
             print("Conexão com o banco de dados fechada.")
 
 if __name__ == "__main__":
-    # Crie a pasta CSV_FOLDER se ela não existir
     if not os.path.exists(CSV_FOLDER):
         os.makedirs(CSV_FOLDER)
         print(f"Pasta '{CSV_FOLDER}' criada. Coloque seus arquivos CSV aqui.")
